@@ -75,7 +75,6 @@ python main.py
 
 ## <span style="color:#3EB489;">7. Hướng phát triển thêm</span>
 
-* Xuất dữ liệu ra Excel
 * Thống kê theo bộ môn / độ tuổi / giới tính
 * Xây dựng phân quyền người dùng
 * Làm thời khoá biểu cho giáo viên
