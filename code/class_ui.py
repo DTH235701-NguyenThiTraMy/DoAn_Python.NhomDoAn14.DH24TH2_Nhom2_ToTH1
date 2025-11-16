@@ -79,17 +79,40 @@ def open_class_management(root, open_main_menu):
     def them():
         malop = entry_malop.get().strip()
         tenlop = entry_tenlop.get().strip()
+
+        # Kiểm tra dữ liệu trống
         if not malop or not tenlop:
             messagebox.showwarning("Thiếu dữ liệu", "Nhập đầy đủ thông tin!")
             return
+
+        # Kiểm tra mã lớp
         if not malop.startswith("L"):
             messagebox.showwarning("Lỗi", "Mã lớp phải bắt đầu bằng L")
             return
+
+        # Kiểm tra tên lớp hợp lệ
         if re.search(r'\d{3,}', tenlop):
             messagebox.showwarning("Lỗi", "Tên lớp không hợp lệ")
             return
+
         conn = connect_db()
         cur = conn.cursor()
+
+        # ---------- Kiểm tra mã lớp trùng ----------
+        cur.execute("SELECT * FROM lop WHERE malop=%s", (malop,))
+        if cur.fetchone():
+            messagebox.showerror("Lỗi", f"Mã lớp {malop} đã tồn tại!")
+            conn.close()
+            return
+
+        # ---------- Kiểm tra tên lớp trùng ----------
+        cur.execute("SELECT * FROM lop WHERE tenlop=%s", (tenlop,))
+        if cur.fetchone():
+            messagebox.showerror("Lỗi", f"Tên lớp '{tenlop}' đã tồn tại!")
+            conn.close()
+            return
+
+        # Thêm dữ liệu nếu hợp lệ
         try:
             cur.execute("INSERT INTO lop(malop, tenlop) VALUES (%s,%s)", (malop, tenlop))
             conn.commit()
@@ -102,18 +125,33 @@ def open_class_management(root, open_main_menu):
     def xoa():
         selected = tree.selection()
         if not selected:
-            messagebox.showwarning("Chưa chọn", "Chọn lớp để xoá!")
+            messagebox.showwarning("Chưa chọn", "Hãy chọn lớp để xoá!")
             return
+
         malop = tree.item(selected)["values"][0]
+
+        if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xoá lớp {malop}?"):
+            return
+
         conn = connect_db()
         cur = conn.cursor()
+
+        # Kiểm tra lớp có giáo viên chủ nhiệm không
+        cur.execute("SELECT COUNT(*) FROM giaovien WHERE cnlop=%s", (malop,))
+        if cur.fetchone()[0] > 0:
+            messagebox.showwarning("Lỗi", f"Lớp {malop} đang có giáo viên chủ nhiệm, không thể xoá!")
+            conn.close()
+            return
+
         try:
             cur.execute("DELETE FROM lop WHERE malop=%s", (malop,))
             conn.commit()
-            load_data()
+            tree.delete(selected)
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
         conn.close()
+
+
 
     def sua():
         selected = tree.selection()

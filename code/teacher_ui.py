@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from tkcalendar import DateEntry
 from utils import center_window
 import mysql.connector
 import re
+import pandas as pd
 
 def connect_db():
     return mysql.connector.connect(
@@ -34,7 +35,8 @@ def open_teacher_management(root, open_main_menu):
     entry_maso = tk.Entry(frame_info, width=12)
     entry_holot = tk.Entry(frame_info, width=25)
     entry_ten = tk.Entry(frame_info, width=15)
-    date_entry = DateEntry(frame_info, width=12, background="darkblue", foreground="white", date_pattern="yyyy-mm-dd")
+    date_entry = DateEntry(frame_info, width=12, date_pattern="yyyy-mm-dd", selectbackground="#1976D2",
+    selectforeground="white")
     gender_var = tk.StringVar(value="Nam")
     gvcn_var = tk.StringVar(value="Không")
     cnlop_combo = ttk.Combobox(frame_info, width=15)
@@ -215,6 +217,12 @@ def open_teacher_management(root, open_main_menu):
 
         conn = connect_db()
         cur = conn.cursor()
+        
+        cur.execute("SELECT * FROM giaovien WHERE maso=%s", (maso,))
+        if cur.fetchone():
+            messagebox.showerror("Lỗi", f"Mã giáo viên {maso} đã tồn tại!")
+            conn.close()
+            return
         if cnlop:
             cur.execute("SELECT COUNT(*) FROM giaovien WHERE cnlop=%s", (cnlop,))
             if cur.fetchone()[0] > 0:
@@ -238,16 +246,31 @@ def open_teacher_management(root, open_main_menu):
         if not selected:
             messagebox.showwarning("Chưa chọn","Hãy chọn giáo viên để xoá!")
             return
+
         maso = tree.item(selected)["values"][0]
+
+        if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xoá giáo viên {maso}?"):
+            return
+
         conn = connect_db()
         cur = conn.cursor()
+
+        # Kiểm tra giáo viên là chủ nhiệm lớp
+        cur.execute("SELECT COUNT(*) FROM lop WHERE malop IN (SELECT cnlop FROM giaovien WHERE maso=%s)", (maso,))
+        if cur.fetchone()[0] > 0:
+            messagebox.showwarning("Lỗi", f"Giáo viên {maso} đang là chủ nhiệm lớp, không thể xoá!")
+            conn.close()
+            return
+
         try:
             cur.execute("DELETE FROM giaovien WHERE maso=%s", (maso,))
             conn.commit()
-            load_data()
+            tree.delete(selected)
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
         conn.close()
+
+
 
     def on_select(event):
         selected = tree.selection()
@@ -314,12 +337,45 @@ def open_teacher_management(root, open_main_menu):
 
     def huy():
         clear_input()
+        
+    def export_to_excel():
+        conn = connect_db()
+        query = """
+            SELECT g.maso, g.holot, g.ten, g.phai, g.ngaysinh,
+                GROUP_CONCAT(m.tenmon SEPARATOR ', ') AS monhoc,
+                g.cnlop
+            FROM giaovien g
+            LEFT JOIN giaovien_monhoc gm ON g.maso = gm.maso
+            LEFT JOIN monhoc m ON gm.mamon = m.mamon
+            GROUP BY g.maso
+            ORDER BY g.maso
+        """
+        df = pd.read_sql(query, conn)
+        conn.close()
+
+        # Mở hộp thoại chọn vị trí lưu file
+        file_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
+                                                filetypes=[("Excel files", "*.xlsx")],
+                                                title="Lưu file Excel")
+        if file_path:
+            df.to_excel(file_path, index=False)
+            messagebox.showinfo("Thành công", "Xuất dữ liệu ra Excel thành công!")
+    
 
     # ===== Tạo nút =====
     buttons = [("Tìm", tim_kiem), ("Thêm", them), ("Sửa", sua), ("Lưu", luu),
-           ("Hủy", huy), ("Xóa", xoa), ("Thoát", lambda: (win.destroy(), open_main_menu()))]
+           ("Hủy", huy), ("Xóa", xoa), 
+           ("Thoát", lambda: (win.destroy(), open_main_menu())), ("Xuất Excel", export_to_excel)]
     for idx, (text, cmd) in enumerate(buttons):
-        make_btn(text, cmd, bg="#B0BEC5" if text=="Thoát" else "#36F1DE").grid(row=0, column=idx, padx=5, pady=5)
+        if text == "Thoát":
+            color = "#B0BEC5"
+        elif text == "Tìm":
+            color = "#6CF2E5"
+        elif text == "Xuất Excel":
+            color = "#4CAF50"
+        else:
+            color = "#36F1DE"
+        make_btn(text, cmd, bg=color).grid(row=0, column=idx, padx=5, pady=5)
 
     tree.bind("<<TreeviewSelect>>", on_select)
     load_data()

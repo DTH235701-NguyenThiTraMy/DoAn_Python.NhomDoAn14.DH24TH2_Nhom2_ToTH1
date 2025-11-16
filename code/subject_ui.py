@@ -90,6 +90,19 @@ def open_subject_management(root, open_main_menu):
             return
         conn = connect_db()
         cur = conn.cursor()
+        # ---------- Kiểm tra mã môn trùng ----------
+        cur.execute("SELECT * FROM monhoc WHERE mamon=%s", (mamon,))
+        if cur.fetchone():
+            messagebox.showerror("Lỗi", f"Mã môn {mamon} đã tồn tại!")
+            conn.close()
+            return
+
+        # ---------- Kiểm tra tên môn trùng ----------
+        cur.execute("SELECT * FROM monhoc WHERE tenmon=%s", (tenmon,))
+        if cur.fetchone():
+            messagebox.showerror("Lỗi", f"Tên môn '{tenmon}' đã tồn tại!")
+            conn.close()
+            return
         try:
             cur.execute("INSERT INTO monhoc(mamon, tenmon) VALUES (%s,%s)", (mamon, tenmon))
             conn.commit()
@@ -102,20 +115,25 @@ def open_subject_management(root, open_main_menu):
     def xoa():
         selected = tree.selection()
         if not selected:
-            messagebox.showwarning("Chưa chọn", "Chọn môn học để xoá!")
+            messagebox.showwarning("Chưa chọn", "Hãy chọn môn học để xoá!")
             return
+
         mamon = tree.item(selected)["values"][0]
+
+        if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xoá môn học {mamon}?"):
+            return
+
         conn = connect_db()
         cur = conn.cursor()
+
         try:
-            # Xóa tất cả liên kết trong giaovien_monhoc trước
-            cur.execute("DELETE FROM giaovien_monhoc WHERE mamon=%s", (mamon,))
             cur.execute("DELETE FROM monhoc WHERE mamon=%s", (mamon,))
             conn.commit()
-            load_data()
+            tree.delete(selected)
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
         conn.close()
+
 
     def sua():
         selected = tree.selection()
