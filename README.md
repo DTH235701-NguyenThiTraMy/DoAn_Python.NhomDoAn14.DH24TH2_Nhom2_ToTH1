@@ -29,6 +29,7 @@ Mục tiêu chính của dự án:
 
 * Thêm, sửa, xoá, lưu, hủy, thoát
 * Tìm kiếm theo mã giáo viên
+* xuất excel
 
 ---
 
