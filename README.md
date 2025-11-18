@@ -1,4 +1,4 @@
-# <span style="color:#3EB489;">🏫 ĐỒ ÁN: Ứng dụng Quản Lý Giáo Viên THPT</span>
+<h1>🏫 ĐỒ ÁN: Ứng dụng Quản Lý Giáo Viên THPT</h1>
 
 ### *Python Tkinter – MySQL • GUI Desktop App*
 
@@ -18,7 +18,7 @@ Mục tiêu chính của dự án:
 ## <span style="color:#3EB489;">2. Giao diện chương trình</span>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4c4f30b9-9aee-4d64-ab4c-cba05aeb1996" alt="Giao diện quản lý giáo viên" width="50%" style="border-radius:10px; box-shadow:0 0 10px #ccc;">
+  <img src="https://github.com/user-attachments/assets/7b9fbe35-c0af-4c74-a5ad-9f86310f4d89" alt="Giao diện quản lý giáo viên" width="50%" style="border-radius:10px; box-shadow:0 0 10px #ccc;">
 </p>
 
 ---
@@ -29,6 +29,7 @@ Mục tiêu chính của dự án:
 
 * Thêm, sửa, xoá, lưu, hủy, thoát
 * Tìm kiếm theo mã giáo viên
+* xuất excel
 
 ---
 
@@ -75,7 +76,6 @@ python main.py
 
 ## <span style="color:#3EB489;">7. Hướng phát triển thêm</span>
 
-* Xuất dữ liệu ra Excel
 * Thống kê theo bộ môn / độ tuổi / giới tính
 * Xây dựng phân quyền người dùng
 * Làm thời khoá biểu cho giáo viên
