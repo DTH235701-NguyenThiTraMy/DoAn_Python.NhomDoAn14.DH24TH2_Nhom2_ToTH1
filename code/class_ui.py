@@ -16,7 +16,7 @@ def open_class_management(root, open_main_menu):
     root.destroy()
     win = tk.Tk()
     win.title("Quản lý lớp")
-    center_window(win, 750, 500)
+    center_window(win, 750, 550)
     win.configure(bg="#E3F2FD")
     win.resizable(False, False)
 
@@ -35,7 +35,18 @@ def open_class_management(root, open_main_menu):
     tk.Label(frame_info, text="Tên lớp:", bg="#FFFFFF", fg="#0D47A1").grid(row=0, column=2, padx=5, pady=5, sticky="w")
     entry_tenlop = tk.Entry(frame_info, width=25)
     entry_tenlop.grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    # ===== Frame nút =====
+    frame_btn = tk.Frame(win, bg="#E3F2FD")
+    frame_btn.pack(padx=15, pady=10, fill="x")
+    for i in range(6):
+        frame_btn.columnconfigure(i, weight=1)
 
+    def make_btn(text, cmd=None, col=0, bg="#36F1DE"):
+        btn = tk.Button(frame_btn, text=text, bg=bg, fg="black",
+                        font=("Arial", 10, "bold"), cursor="hand2",
+                        relief="raised", activebackground="#4DB6AC", command=cmd)
+        btn.grid(row=0, column=col, padx=5, pady=5, sticky="ew")
+        return btn
     # ===== Frame danh sách =====
     frame_list = tk.LabelFrame(win, text="Danh sách lớp", bg="#FFFFFF", fg="#0D47A1",
                                font=("Arial", 12, "bold"), padx=5, pady=5)
@@ -53,14 +64,12 @@ def open_class_management(root, open_main_menu):
     frame_btn.pack(padx=15, pady=10, fill="x")
     for i in range(6):
         frame_btn.columnconfigure(i, weight=1)
-
     def make_btn(text, cmd=None, col=0, bg="#36F1DE"):
         btn = tk.Button(frame_btn, text=text, bg=bg, fg="black",
                         font=("Arial", 10, "bold"), cursor="hand2",
                         relief="raised", activebackground="#4DB6AC", command=cmd)
         btn.grid(row=0, column=col, padx=5, pady=5, sticky="ew")
         return btn
-
     # ===== Hàm CRUD =====
     def clear_input():
         entry_malop.delete(0, tk.END)
@@ -150,7 +159,6 @@ def open_class_management(root, open_main_menu):
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
         conn.close()
-
 
 
     def sua():

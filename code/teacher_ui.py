@@ -20,11 +20,40 @@ def open_teacher_management(root, open_main_menu):
     win.title("Quản lý giáo viên")
     center_window(win, 1000, 600)
     win.configure(bg="#E3F2FD")
-    win.resizable(False, False)
+    win.resizable(True, True)
 
     # ===== Tiêu đề =====
     tk.Label(win, text="QUẢN LÝ GIÁO VIÊN THPT",
              font=("Arial", 18, "bold"), bg="#E3F2FD", fg="#1565C0").pack(pady=15)
+    # ===== Frame danh sách =====
+    frame_list = tk.LabelFrame(win, text="Danh sách giáo viên", bg="#FFFFFF", fg="#0D47A1",
+                               font=("Arial", 12, "bold"), padx=5, pady=5)
+    frame_list.pack(padx=15, pady=10, fill="both", expand=True)
+
+    columns = ("maso","holot","ten","phai","ngaysinh","monhoc","cnlop")
+    tree = ttk.Treeview(frame_list, columns=columns, show="headings")
+    for col in columns:
+        tree.heading(col, text=col.capitalize())
+        tree.column(col, width=120, anchor="center")
+    tree.pack(fill="both", expand=True)
+    
+    tree.heading("maso", text="Mã giáo viên")
+    tree.heading("holot", text="Họ lót")
+    tree.heading("ten", text="Tên")
+    tree.heading("phai", text="Phái")
+    tree.heading("ngaysinh", text="Ngày sinh")
+    tree.heading("monhoc", text="Môn học")
+    tree.heading("cnlop", text="Chủ nhiệm lớp")
+
+
+    # ===== Frame nút =====
+    frame_btn = tk.Frame(win, bg="#E3F2FD")
+    frame_btn.pack(pady=10)
+
+    def make_btn(text, cmd=None, bg="#36F1DE"):
+        return tk.Button(frame_btn, text=text, width=10, bg=bg, fg="black",
+                         font=("Arial", 10, "bold"), cursor="hand2",
+                         relief="raised", activebackground="#4DB6AC", command=cmd)
 
     # ===== Frame thông tin =====
     frame_info = tk.LabelFrame(win, text="Thông tin giáo viên", bg="#FFFFFF", fg="#0D47A1",
@@ -341,14 +370,12 @@ def open_teacher_management(root, open_main_menu):
     def export_to_excel():
         conn = connect_db()
         query = """
-            SELECT g.maso, g.holot, g.ten, g.phai, g.ngaysinh,
-                GROUP_CONCAT(m.tenmon SEPARATOR ', ') AS monhoc,
-                g.cnlop
-            FROM giaovien g
-            LEFT JOIN giaovien_monhoc gm ON g.maso = gm.maso
-            LEFT JOIN monhoc m ON gm.mamon = m.mamon
-            GROUP BY g.maso
-            ORDER BY g.maso
+            SELECT 
+            g.maso AS 'Mã số',
+            g.ten AS 'Tên'
+        FROM giaovien g
+        ORDER BY g.ten;
+
         """
         df = pd.read_sql(query, conn)
         conn.close()
