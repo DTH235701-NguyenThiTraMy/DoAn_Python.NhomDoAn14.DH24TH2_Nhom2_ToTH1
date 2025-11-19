@@ -123,7 +123,6 @@ def open_teacher_management(root, open_main_menu):
     tree.heading("monhoc", text="Môn học")
     tree.heading("cnlop", text="Chủ nhiệm lớp")
 
-
     # ===== Frame nút =====
     frame_btn = tk.Frame(win, bg="#E3F2FD")
     frame_btn.pack(pady=10)
@@ -191,7 +190,6 @@ def open_teacher_management(root, open_main_menu):
             tree.insert("", tk.END, values=row)
         else:
             messagebox.showerror("Không tìm thấy", f"Không có giáo viên mã: {maso}")
-
 
     def them():
         maso = entry_maso.get().strip()
@@ -269,7 +267,6 @@ def open_teacher_management(root, open_main_menu):
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
         conn.close()
-
 
 
     def on_select(event):
